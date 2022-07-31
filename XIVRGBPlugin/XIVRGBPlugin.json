@@ -1,0 +1,12 @@
+{
+  "Author": "Rayziken",
+  "Name": "XIV RGB Plugin",
+  "Punchline": "Enables RGB effects depending on in game actions",
+  "Description": "A plugin integrating RGB devices with FFXIV, enabling effects that change depending on what happens in game. /prgb -> opens the config menu",
+  "InternalName": "XIVRGBPlugin",
+  "ApplicableVersion": "any",
+  "Tags": [
+    "plugin",
+    "RGB"
+  ]
+}

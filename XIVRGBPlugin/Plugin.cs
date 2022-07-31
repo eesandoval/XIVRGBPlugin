@@ -4,17 +4,17 @@ using Dalamud.Plugin;
 using System.IO;
 using System.Reflection;
 
-namespace SamplePlugin
+namespace XIVRGBPlugin
 {
     public sealed class Plugin : IDalamudPlugin
     {
-        public string Name => "Sample Plugin";
+        public string Name => "XIV RGB Plugin";
 
-        private const string commandName = "/pmycommand";
+        private const string commandName = "/prgb";
 
         private DalamudPluginInterface PluginInterface { get; init; }
         private CommandManager CommandManager { get; init; }
-        private Configuration Configuration { get; init; }
+        private Configuration Configuration { get; init; } 
         private PluginUI PluginUi { get; init; }
 
         public Plugin(
@@ -34,7 +34,7 @@ namespace SamplePlugin
 
             this.CommandManager.AddHandler(commandName, new CommandInfo(OnCommand)
             {
-                HelpMessage = "A useful message to display in /xlhelp"
+                HelpMessage = "Opens the RGB Settings Menu"
             });
 
             this.PluginInterface.UiBuilder.Draw += DrawUI;
@@ -50,7 +50,7 @@ namespace SamplePlugin
         private void OnCommand(string command, string args)
         {
             // in response to the slash command, just display our main ui
-            this.PluginUi.Visible = true;
+            this.PluginUi.SettingsVisible = true;
         }
 
         private void DrawUI()
