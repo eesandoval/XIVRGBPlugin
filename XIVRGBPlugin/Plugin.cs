@@ -1,4 +1,5 @@
-﻿using Dalamud.Game.Command;
+﻿using Dalamud.Data;
+using Dalamud.Game.Command;
 using Dalamud.IoC;
 using Dalamud.Plugin;
 using System.IO;
@@ -6,11 +7,14 @@ using System.Reflection;
 
 namespace XIVRGBPlugin
 {
-    public sealed class Plugin : IDalamudPlugin
+    public partial class Plugin : IDalamudPlugin
     {
         public string Name => "XIV RGB Plugin";
 
         private const string commandName = "/prgb";
+
+       // private ExcelSheet<TerritoryTypeTransient> _transientSheet = DalamudSvcHandler.DataManager.Excel.GetSheet<TerritoryTypeTransient>()!;
+
 
         private DalamudPluginInterface PluginInterface { get; init; }
         private CommandManager CommandManager { get; init; }
@@ -28,9 +32,7 @@ namespace XIVRGBPlugin
             this.Configuration.Initialize(this.PluginInterface);
 
             // you might normally want to embed resources and load them from the manifest stream
-            var imagePath = Path.Combine(PluginInterface.AssemblyLocation.Directory?.FullName!, "goat.png");
-            var goatImage = this.PluginInterface.UiBuilder.LoadImage(imagePath);
-            this.PluginUi = new PluginUI(this.Configuration, goatImage);
+            this.PluginUi = new PluginUI(this.Configuration);
 
             this.CommandManager.AddHandler(commandName, new CommandInfo(OnCommand)
             {
@@ -39,12 +41,15 @@ namespace XIVRGBPlugin
 
             this.PluginInterface.UiBuilder.Draw += DrawUI;
             this.PluginInterface.UiBuilder.OpenConfigUi += DrawConfigUI;
+            DalamudSvcHandler.ChatGui.ChatMessage += ChatMessage;
+            DalamudSvcHandler.ClientState.TerritoryChanged += TerritoryChanged;
         }
 
         public void Dispose()
         {
             this.PluginUi.Dispose();
             this.CommandManager.RemoveHandler(commandName);
+            DalamudSvcHandler.ChatGui.ChatMessage -= ChatMessage;
         }
 
         private void OnCommand(string command, string args)

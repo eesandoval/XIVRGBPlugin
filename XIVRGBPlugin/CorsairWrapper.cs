@@ -23,17 +23,17 @@ namespace XIVRGBPlugin
         [StructLayout(LayoutKind.Sequential, CharSet = CharSet.Ansi)]
         public struct CorsairLedPosition
         {
-            public IntPtr ledId;
-            public IntPtr top;
-            public IntPtr left;
-            public IntPtr height;
-            public IntPtr width;
+            public int ledId;
+            public double top;
+            public double left;
+            public double height;
+            public double width;
         }
 
         [StructLayout(LayoutKind.Sequential, CharSet = CharSet.Ansi)]
         public struct CorsairLedPositions
         {
-            public IntPtr numberOfLed;
+            public int numberOfLed;
             public IntPtr pLedPosition;
         }
 
@@ -57,6 +57,15 @@ namespace XIVRGBPlugin
             IntPtr channels;
         };
 
+        [StructLayout(LayoutKind.Sequential)]
+        public struct CorsairLedColor
+        {
+            public int ledId;
+            public int r;
+            public int g;
+            public int b;
+        }
+
 
         [DllImport("CUESDK.x64_2019.dll")]
         public static extern int CorsairGetDeviceCount();
@@ -66,10 +75,29 @@ namespace XIVRGBPlugin
 
 
         [DllImport("CUESDK.x64_2019.dll")]
-        public static extern CorsairLedPositions CorsairGetLedPositionsByDeviceIndex(int deviceIndex);
+        public static extern IntPtr CorsairGetLedPositionsByDeviceIndex(int deviceIndex);
 
         [DllImport("CUESDK.x64_2019.dll")]
         public static extern IntPtr CorsairGetDeviceInfo(int deviceIndex);
+
+        public static Dictionary<int, List<CorsairLedColor>> GetAvailableKeys()
+        {
+            Dictionary<int, List<CorsairLedColor>> result = new Dictionary<int, List<CorsairLedColor>>();
+            for (var deviceIndex = 0; deviceIndex < CorsairGetDeviceCount(); deviceIndex++)
+            {
+                var ledPositionsPtr = CorsairGetLedPositionsByDeviceIndex(deviceIndex);
+                var ledPositions = (CorsairLedPositions)Marshal.PtrToStructure(ledPositionsPtr, typeof(CorsairLedPositions));
+                var ledColorsVector = new List<CorsairLedColor>();
+                for (var i = 0; i < ledPositions.numberOfLed; i++)
+                {
+                    var ledIdPtr = ledPositions.pLedPosition + Marshal.SizeOf(typeof(CorsairLedPosition));
+                    var ledId = ((CorsairLedPosition)Marshal.PtrToStructure(ledIdPtr, typeof(CorsairLedPosition))).ledId;
+                    ledColorsVector.Add(new CorsairLedColor() { ledId = ledId, r = 0, g = 0, b = 0 });
+                }
+                result.Add(deviceIndex, ledColorsVector);
+            }
+            return result;
+        }
 
     }
 }
